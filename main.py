@@ -27,6 +27,10 @@ class Cafe(db.Model):
 app.app_context().push()
 db.create_all()
 
+# converting to a dictionary - for each table column entry
+def to_dict(self):
+    return {column.name: getattr(self, column.name) for column in self.__table__.columns}
+
 @app.route("/")
 def home():
     return render_template("index.html")
@@ -56,6 +60,14 @@ def random_cafe():
                         "coffee_price": random_cafe.coffee_price 
                         }
                     })
+
+@app.route('/all', methods=['GET'])
+def all_cafes():
+    cafes = db.session.query(Cafe).all()
+    
+    # converts every cafe attribute into a dic entry then adds to list
+    return jsonify(cafes=[to_dict(cafe) for cafe in cafes])
+    
 
 ## HTTP POST - Create Record
 
